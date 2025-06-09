@@ -109,6 +109,7 @@ app.delete('/api/log/latest', (req, res) => {
 });
 
 // تشغيل الخادم
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+// استمع على كل الواجهات (0.0.0.0) وهو ما يتطلبه Fly.io
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server is running on port ${PORT}`);
 });
