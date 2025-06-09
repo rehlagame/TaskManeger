@@ -1,5 +1,5 @@
 const sqlite3 = require('sqlite3').verbose();
-const DB_SOURCE = "tasks.db"; // اسم ملف قاعدة البيانات
+const DB_SOURCE = "/data/tasks.db";// اسم ملف قاعدة البيانات
 
 const db = new sqlite3.Database(DB_SOURCE, (err) => {
     if (err) {
