@@ -1,27 +1,27 @@
 # fly.toml app configuration file for qmaticshiftc
-# See https://fly.io/docs/reference/configuration/ for information
+# This is the final and correct version.
 
 app = 'qmaticshiftc'
 primary_region = 'fra'
 
-# Tell Fly how to run the app
-[deploy]
-  release_command = "npm start"
+# This section defines how the app runs.
+# This is the correct place for the start command.
+[processes]
+  app = "npm start"
 
-# This section configures the web service
 [http_service]
   internal_port = 3000
   force_https = true
   auto_stop_machines = true
   auto_start_machines = true
   min_machines_running = 0
+  processes = ["app"]
 
-# This section creates the persistent volume for your SQLite database.
 [mounts]
   source = "task_data"
   destination = "/data"
 
-# This is the new, important section for Health Checks
+# This section defines how to check if the app is healthy.
 [[services]]
   protocol = "tcp"
   internal_port = 3000
@@ -31,10 +31,9 @@ primary_region = 'fra'
     interval = "15s"
     timeout = "10s"
     method = "get"
-    path = "/api/team" # We will check a real API endpoint
-    grace_period = "30s" # Give the app 30 seconds to start up before checking
+    path = "/api/team"
+    grace_period = "30s"
 
-# This section defines the size of the virtual machine
 [[vm]]
   memory = '1gb'
   cpu_kind = 'shared'
