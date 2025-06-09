@@ -1,16 +1,28 @@
 const sqlite3 = require('sqlite3').verbose();
-// تحقق مما إذا كنا نعمل على Fly.io (الذي يوفر هذا المتغير) أم محلياً
+const path = require('path'); // سنستخدم مكتبة path المدمجة للتعامل مع المسارات بشكل أفضل
+
+// --- الكود الذكي لتحديد مسار قاعدة البيانات ---
+
+// 1. تحقق مما إذا كنا نعمل على بيئة الإنتاج (خادم Fly.io)
 const isProduction = process.env.FLY_APP_NAME;
 
-// اختر مسار قاعدة البيانات بناءً على البيئة
-const DB_SOURCE = isProduction ? "/data/tasks.db" : "tasks.db";
+// 2. حدد المجلد الذي يجب أن تُحفظ فيه قاعدة البيانات
+//    - في بيئة الإنتاج، سيكون المجلد الدائم '/data'
+//    - في البيئة المحلية، سيكون المجلد الحالي 'backend'
+const dbFolder = isProduction ? '/data' : __dirname;
+
+// 3. أنشئ المسار الكامل لملف قاعدة البيانات
+const DB_SOURCE = path.join(dbFolder, 'tasks.db');
+
+// ----------------------------------------------
+
 
 const db = new sqlite3.Database(DB_SOURCE, (err) => {
     if (err) {
-        console.error(err.message);
+        console.error("Failed to connect to database:", err.message);
         throw err;
     } else {
-        console.log('Connected to the SQLite database.');
+        console.log(`Connected to the SQLite database at ${DB_SOURCE}`);
 
         db.serialize(() => {
             // جدول أعضاء الفريق
@@ -19,12 +31,11 @@ const db = new sqlite3.Database(DB_SOURCE, (err) => {
                 name TEXT NOT NULL
             )`, (err) => {
                 if (err) {
-                    // هذا الخطأ لن يحدث عادة إلا في حالات نادرة مثل عدم وجود صلاحيات للكتابة
                     console.error("Error creating team_members table", err.message);
                 }
             });
 
-            // جدول سجل المهام (بدون التعليق الخاطئ)
+            // جدول سجل المهام
             db.run(`CREATE TABLE IF NOT EXISTS task_log (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 timestamp TEXT NOT NULL,
@@ -34,7 +45,6 @@ const db = new sqlite3.Database(DB_SOURCE, (err) => {
                 previous_assignment_index INTEGER
             )`, (err) => {
                 if (err) {
-                    // هذا هو المكان الذي ظهر فيه الخطأ عندك
                     console.error("Error creating task_log table", err.message);
                 }
             });
