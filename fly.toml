@@ -1,21 +1,41 @@
-# fly.toml app configuration file generated for qmaticshiftc on 2025-06-10T00:07:27+03:00
-#
-# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
-#
+# fly.toml app configuration file for qmaticshiftc
+# Final and correct version
 
 app = 'qmaticshiftc'
 primary_region = 'fra'
 
-[build]
+# Defines the command to run the application
+[processes]
+  app = "npm start"
 
+# Configures the web service and its port
 [http_service]
   internal_port = 3000
   force_https = true
-  auto_stop_machines = 'stop'
+  auto_stop_machines = true
   auto_start_machines = true
   min_machines_running = 0
-  processes = ['app']
+  processes = ["app"]
 
+# Creates the persistent volume for the SQLite database
+[mounts]
+  source = "task_data"
+  destination = "/data"
+
+# Defines how to check if the app is healthy and running
+[[services]]
+  protocol = "tcp"
+  internal_port = 3000
+  processes = ["app"]
+
+  [[services.http_checks]]
+    interval = "15s"
+    timeout = "10s"
+    method = "get"
+    path = "/api/team"
+    grace_period = "30s"
+
+# Defines the virtual machine size
 [[vm]]
   memory = '1gb'
   cpu_kind = 'shared'
