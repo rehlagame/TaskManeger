@@ -1,5 +1,9 @@
 const sqlite3 = require('sqlite3').verbose();
-const DB_SOURCE = "/data/tasks.db";// اسم ملف قاعدة البيانات
+// تحقق مما إذا كنا نعمل على Fly.io (الذي يوفر هذا المتغير) أم محلياً
+const isProduction = process.env.FLY_APP_NAME;
+
+// اختر مسار قاعدة البيانات بناءً على البيئة
+const DB_SOURCE = isProduction ? "/data/tasks.db" : "tasks.db";
 
 const db = new sqlite3.Database(DB_SOURCE, (err) => {
     if (err) {
